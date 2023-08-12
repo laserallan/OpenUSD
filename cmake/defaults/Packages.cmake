@@ -27,6 +27,7 @@
 # below may wind up stomping over this value.
 set(build_shared_libs "${BUILD_SHARED_LIBS}")
 
+
 # Core USD Package Requirements 
 # ----------------------------------------------
 
@@ -134,7 +135,9 @@ if(PXR_ENABLE_PYTHON_SUPPORT)
         python${python_version_nodot}
         REQUIRED
     )
+    # TODO: Guard on enabling
     set(Boost_PYTHON_LIBRARY "${Boost_PYTHON${python_version_nodot}_LIBRARY}")
+    # message(FATAL_ERROR "BLAI Boost_PYTHON${python_version_nodot}_LIBRARY ${Boost_PYTHON_LIBRARY}" )
 
     # --Jinja2
     find_package(Jinja2)
