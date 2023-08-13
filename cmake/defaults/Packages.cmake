@@ -135,9 +135,7 @@ if(PXR_ENABLE_PYTHON_SUPPORT)
         python${python_version_nodot}
         REQUIRED
     )
-    # TODO: Guard on enabling
     set(Boost_PYTHON_LIBRARY "${Boost_PYTHON${python_version_nodot}_LIBRARY}")
-    # message(FATAL_ERROR "BLAI Boost_PYTHON${python_version_nodot}_LIBRARY ${Boost_PYTHON_LIBRARY}" )
 
     # --Jinja2
     find_package(Jinja2)

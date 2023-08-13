@@ -4,7 +4,6 @@ if(TARGET boost_python311)
 endif()
 # TODO: Include guard?
 message("Fetching boost")
-
 # find_package(PythonLibs 3.11 REQUIRED)
 set(BOOST_ENABLE_PYTHON TRUE)
 FetchContent_Declare(
@@ -14,9 +13,29 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(Boost)
-set(_BOOST_PYTHON_TARGET boost_python311)
-# Sneaking in boost dependencies here as targets
-set(Boost_PYTHON311_LIBRARY ${_BOOST_PYTHON_TARGET} boost_vmd boost_any boost_assign boost_variant boost_multi_index boost_crc)
+
+# At this point there seems to be no variables to identify the python
+# version in scope meaning we are falling back to a hack to identify
+# the appropriate boost python target
+
+# Scan likely python minor versions
+set(_BOOST_PYTHON_FOUND FALSE)
+foreach(_V RANGE 6 12)
+    set(_BOOST_PYTHON_TARGET boost_python3${_V})
+    if(TARGET ${_BOOST_PYTHON_TARGET})
+        message("Found boost python target ${_BOOST_PYTHON_TARGET}")
+        # Sneaking in boost dependencies here as targets
+        # Ideally boost should be explicit about boost dependencies and this
+        # means we are linking more boost libraries than we need in many cases
+        set(Boost_PYTHON3${_V}_LIBRARY ${_BOOST_PYTHON_TARGET} boost_vmd boost_any boost_assign boost_variant boost_multi_index boost_crc)
+        set(_BOOST_PYTHON_FOUND TRUE)        
+        break()
+    endif()
+endforeach()
+if(NOT _BOOST_PYTHON_FOUND)
+    message(FATAL_ERROR "Failed to found version specific boost target")
+endif()
+
 if(NOT TARGET ${_BOOST_PYTHON_TARGET})
     message(FATAL_ERROR "no python target found")
 endif()
@@ -100,24 +119,24 @@ set(_BOOST_LIBS ${_BOOST_PYTHON_TARGET}
                 boost_rational
                 boost_vmd
                 boost_crc)
-foreach(T ${_BOOST_LIBS})
-message(${T})
-install(TARGETS ${T} EXPORT pxrTargets
-# explicit destination specification required for 3.13, 3.14 no longer needs it
-RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-PRIVATE_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-)
-if(${T} STREQUAL ${_BOOST_PYTHON_TARGET})
-    set_target_properties(${_BOOST_PYTHON_TARGET} PROPERTIES INTERFACE_INCLUDE_DIRECTORIES 
-        "$<BUILD_INTERFACE:${Boost_SOURCE_DIR}/libs/python/include>;$<INSTALL_INTERFACE:include/boost-1_83>")
-endif()
-get_target_property(Blahg ${T} INTERFACE_INCLUDE_DIRECTORIES)
-message("${T}: ${Blahg}")
 
+# Clean up libraries to avoid issues when using in usd
+foreach(T ${_BOOST_LIBS})
+    # Install with exports in a usd friendly way to avoid
+    # complaints about targets missing in pxrTargets
+    install(TARGETS ${T} EXPORT pxrTargets
+        # explicit destination specification required for 3.13, 3.14 no longer needs it
+        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        PRIVATE_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+        PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+    )
+
+    # For some reason the boost python target has messed up interface include 
+    # locations
+    if(${T} STREQUAL ${_BOOST_PYTHON_TARGET})
+        set_target_properties(${_BOOST_PYTHON_TARGET} PROPERTIES INTERFACE_INCLUDE_DIRECTORIES 
+            "$<BUILD_INTERFACE:${Boost_SOURCE_DIR}/libs/python/include>;$<INSTALL_INTERFACE:include/boost-1_83>")
+    endif()
 endforeach()
-# boost_install_target(TARGET boost_python311 VERSION "1.83.0")
-# set(_BOOST_MODULES preprocessor)
-# list
