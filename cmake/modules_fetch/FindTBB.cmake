@@ -9,7 +9,7 @@ FetchContent_Declare(
   GIT_TAG        9e219e2 
 )
 FetchContent_MakeAvailable(TBB)
-
+set(TBB_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(TBB_INCLUDE_DIR $<BUILD_INTERFACE:${tbb_SOURCE_DIR}/include>)
 set(TBB_INCLUDE_DIRS $<BUILD_INTERFACE:${tbb_SOURCE_DIR}/include>)
 # message(FATAL_ERROR "Blah: ${TBB_INCLUDE_DIRS}")
