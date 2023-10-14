@@ -15,6 +15,7 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH
     ${PROJECT_SOURCE_DIR}/cmake/defaults
+    ${PROJECT_SOURCE_DIR}/cmake/modules_fetch # TODO: Document, hide behind variable
     ${PROJECT_SOURCE_DIR}/cmake/modules
     ${PROJECT_SOURCE_DIR}/cmake/macros)
 

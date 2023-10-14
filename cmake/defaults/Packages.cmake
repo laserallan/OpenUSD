@@ -27,6 +27,7 @@
 # below may wind up stomping over this value.
 set(build_shared_libs "${BUILD_SHARED_LIBS}")
 
+
 # Core USD Package Requirements 
 # ----------------------------------------------
 
